@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 
-export default function Tos() {
+export default function TOS() {
     const location = useLocation();
     const [boards, setBoards] = useState([]);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -26,7 +26,7 @@ export default function Tos() {
                 <title>Terms of Service | AVKorTV</title>
                 <meta
                     name="description"
-                    content="Read the Terms of Service of AVKorTV before using our platform."
+                    content="Read the Terms of Service for using AVKorTV."
                 />
                 <link
                     rel="canonical"
@@ -36,8 +36,14 @@ export default function Tos() {
 
             {/* Header */}
             <header className="bg-gray-800 text-white p-4 flex justify-between items-center shadow">
-                <h1 className="text-lg font-bold">
-                    <Link to="/">AVKorTV</Link>
+                <h1 className="text-4xl font-bold">
+                    <Link to="/">
+                        <img
+                            src="/avkortv_logo.png"
+                            alt="AVKorTV Logo"
+                            className="h-10 w-auto"
+                        />
+                    </Link>
                 </h1>
                 <button
                     className="md:hidden bg-gray-700 px-3 py-1 rounded"
@@ -50,15 +56,17 @@ export default function Tos() {
             <div className="flex flex-1">
                 {/* Left Sidebar */}
                 <aside
-                    className={`bg-gray-800 w-64 p-4 border-r border-gray-700 absolute md:relative md:translate-x-0 h-full z-20 transition-transform duration-200 ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full md:block"
+                    className={`bg-gray-800 w-64 p-4 border-r border-gray-700 absolute md:relative md:translate-x-0 z-20 transition-transform duration-200 ${mobileMenuOpen
+                            ? "translate-x-0"
+                            : "-translate-x-full md:block"
                         }`}
                 >
-                    <h2 className="font-bold mb-2 text-gray-300">Menu</h2>
+                    <h2 className="font-semibold mb-2 text-gray-300">Menu</h2>
                     <ul className="space-y-1">
                         <li>
                             <Link
                                 to="/"
-                                className="block w-full text-left px-2 py-1 rounded hover:bg-gray-700"
+                                className="block w-full text-left px-2 py-1 rounded hover:bg-gray-700 font-semibold"
                                 onClick={() => setMobileMenuOpen(false)}
                             >
                                 Main
@@ -68,7 +76,7 @@ export default function Tos() {
                             <li key={b.id}>
                                 <Link
                                     to={`/${b.slug}/1`}
-                                    className="block w-full text-left px-2 py-1 rounded hover:bg-gray-700"
+                                    className="block w-full text-left px-2 py-1 rounded hover:bg-gray-700 font-semibold"
                                     onClick={() => setMobileMenuOpen(false)}
                                 >
                                     {b.name}
@@ -76,13 +84,16 @@ export default function Tos() {
                             </li>
                         ))}
                     </ul>
-                    <h2 className="font-bold mb-2 text-gray-300 mt-4">How to Use?</h2>
+
+                    <h2 className="font-semibold mb-2 text-gray-300 mt-4">
+                        How to Use?
+                    </h2>
                     <ul className="space-y-1">
                         <li>
                             <Link
                                 to="/about"
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="block w-full text-left px-2 py-1 rounded hover:bg-gray-700"
+                                className="block w-full text-left px-2 py-1 rounded hover:bg-gray-700 font-semibold"
                             >
                                 About Us
                             </Link>
@@ -91,7 +102,7 @@ export default function Tos() {
                             <Link
                                 to="/tos"
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="block w-full text-left px-2 py-1 rounded hover:bg-gray-700"
+                                className="block w-full text-left px-2 py-1 rounded bg-blue-600 text-white font-semibold"
                             >
                                 TOS
                             </Link>
@@ -100,18 +111,9 @@ export default function Tos() {
                             <Link
                                 to="/privacy"
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="block w-full text-left px-2 py-1 rounded hover:bg-gray-700"
+                                className="block w-full text-left px-2 py-1 rounded hover:bg-gray-700 font-semibold"
                             >
                                 Privacy
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
-                                to="/qna"
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="block w-full text-left px-2 py-1 rounded hover:bg-gray-700"
-                            >
-                                1:1 QnA
                             </Link>
                         </li>
                     </ul>
@@ -119,23 +121,25 @@ export default function Tos() {
 
                 {/* Main Content + Right Sidebar */}
                 <div className="flex flex-1">
-                    <main className="flex-1 p-4 space-y-4">
-                        <h2 className="text-xl font-bold">Terms of Service</h2>
+                    <main className="flex-1 p-6 space-y-4">
+                        <h2 className="text-2xl font-bold">Terms of Service</h2>
                         <p className="text-gray-300 leading-relaxed">
-                            By accessing and using AVKorTV, you agree to comply with
-                            our Terms of Service. Users must be of legal age in
-                            their jurisdiction and agree not to misuse the platform.
+                            By using AVKorTV, you agree to follow our Terms of
+                            Service. Please read them carefully before using
+                            our platform.
                         </p>
                         <p className="text-gray-300 leading-relaxed">
-                            Any violation of our terms may result in account
-                            suspension or permanent ban. We reserve the right to
-                            update these terms at any time without prior notice.
+                            We reserve the right to update or modify these
+                            terms at any time without prior notice. Continued
+                            use of AVKorTV means you accept any changes.
                         </p>
                     </main>
 
                     {/* Right Sidebar */}
                     <aside className="hidden lg:block w-[300px] bg-gray-800 border-l border-gray-700 p-4">
-                        <h2 className="font-bold text-gray-300 mb-2">Sponsored</h2>
+                        <h2 className="font-bold text-gray-300 mb-2">
+                            Sponsored
+                        </h2>
                         <div className="space-y-4">
                             <div className="bg-gray-700 h-60 flex items-center justify-center text-gray-400">
                                 Banner Ad 1
@@ -149,7 +153,7 @@ export default function Tos() {
             </div>
 
             {/* Footer */}
-            <footer className="bg-gray-800 text-center p-4 text-sm text-gray-400 border-t border-gray-700">
+            <footer className="bg-gray-800 text-center p-4 text-sm text-gray-400">
                 © {new Date().getFullYear()} AVKorTV. All rights reserved.
             </footer>
         </div>

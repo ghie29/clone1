@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
+import Sidebar from "../components/Sidebar";
 
 export default function Home() {
     const { boardSlug, page: pageParam } = useParams();
@@ -98,8 +99,14 @@ export default function Home() {
 
             {/* Header */}
             <header className="bg-gray-800 text-white p-4 flex justify-between items-center shadow">
-                <h1 className="text-lg font-bold">
-                    <Link to="/">AVKorTV</Link>
+                <h1 className="text-4xl font-bold">
+                    <Link to="/">
+                        <img
+                            src="/avkortv_logo.png"
+                            alt="AVKorTV Logo"
+                            className="h-10 w-auto"
+                        />
+                    </Link>
                 </h1>
                 <button
                     className="md:hidden bg-gray-700 px-3 py-1 rounded"
@@ -111,81 +118,12 @@ export default function Home() {
 
             <div className="flex flex-1">
                 {/* Sidebar */}
-                <aside
-                    className={`bg-gray-800 w-64 p-4 border-r border-gray-700 absolute md:relative md:translate-x-0  z-20 transition-transform duration-200 ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full md:block"
-                        }`}
-                >
-                    <h2 className="font-bold mb-2 text-gray-300">Menu</h2>
-                    <ul className="space-y-1">
-                        <li key="main">
-                            <Link
-                                to="/"
-                                onClick={() => setMobileMenuOpen(false)}
-                                className={`block w-full text-left px-2 py-1 rounded ${!selectedBoard
-                                        ? "bg-blue-600 text-white"
-                                        : "hover:bg-gray-700"
-                                    }`}
-                            >
-                                Main
-                            </Link>
-                        </li>
-
-                        {boards.map((b) => (
-                            <li key={b.id}>
-                                <Link
-                                    to={`/${b.slug}/1`}
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    className={`block w-full text-left px-2 py-1 rounded ${selectedBoard?.id === b.id
-                                            ? "bg-blue-600 text-white"
-                                            : "hover:bg-gray-700"
-                                        }`}
-                                >
-                                    {b.name}
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
-
-                    <h2 className="font-bold mb-2 text-gray-300 mt-4">How to Use?</h2>
-                    <ul className="space-y-1">
-                        <li>
-                            <Link
-                                to="/about"
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="block w-full text-left px-2 py-1 rounded hover:bg-gray-700"
-                            >
-                                About Us
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
-                                to="/tos"
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="block w-full text-left px-2 py-1 rounded hover:bg-gray-700"
-                            >
-                                TOS
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
-                                to="/privacy"
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="block w-full text-left px-2 py-1 rounded hover:bg-gray-700"
-                            >
-                                Privacy
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
-                                to="/qna"
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="block w-full text-left px-2 py-1 rounded hover:bg-gray-700"
-                            >
-                                1:1 QnA
-                            </Link>
-                        </li>
-                    </ul>
-                </aside>
+                <Sidebar
+                    mobileMenuOpen={mobileMenuOpen}
+                    setMobileMenuOpen={setMobileMenuOpen}
+                    boards={boards}
+                    selectedBoard={selectedBoard}
+                />
 
                 {/* Main */}
                 <main className="flex-1 p-4">

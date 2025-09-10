@@ -132,8 +132,14 @@ export default function Watch() {
 
             {/* Header */}
             <header className="bg-gray-800 text-white p-4 flex justify-between items-center shadow">
-                <h1 className="text-lg font-bold">
-                    <Link to="/">AVKorTV</Link>
+                <h1 className="text-4xl font-bold">
+                    <Link to="/">
+                        <img
+                            src="/avkortv_logo.png"
+                            alt="AVKorTV Logo"
+                            className="h-10 w-auto"
+                        />
+                    </Link>
                 </h1>
                 <button
                     className="md:hidden bg-gray-700 px-3 py-1 rounded"
