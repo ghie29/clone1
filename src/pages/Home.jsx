@@ -4,6 +4,7 @@ import { supabase } from "../supabaseClient";
 import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+import Ads from "../components/Ads";
 
 export default function Home() {
     const { boardSlug, page: pageParam } = useParams();
@@ -112,20 +113,19 @@ export default function Home() {
 
                 <div className="flex items-center space-x-4">
                     {/* Search Icon */}
-                    <button className="bg-gray-700 p-2 rounded hover:bg-gray-600">
+                    <button className="w-10 h-10 flex items-center justify-center bg-gray-700 rounded hover:bg-gray-600">
                         <MagnifyingGlassIcon className="h-6 w-6 text-white" />
                     </button>
 
                     {/* Hamburger Button */}
                     <button
-                        className="md:hidden bg-gray-700 px-3 py-1 rounded hover:bg-gray-600"
+                        className="w-10 h-10 flex items-center justify-center bg-gray-700 rounded hover:bg-gray-600 md:hidden"
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                     >
                         ☰
                     </button>
                 </div>
             </header>
-
 
             <div className="flex flex-1">
                 {/* Sidebar */}
@@ -140,22 +140,7 @@ export default function Home() {
                 <main className="flex-1 p-4">
                     {!selectedBoard ? (
                         <>
-                            <p className="text-gray-400"></p>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                                {Array.from({ length: 16 }, (_, i) => {
-                                    const index = i + 1;
-                                    const ext = index === 9 || index === 11 || index === 12 ? "png" : "jpg";
-                                    return (
-                                        <div key={index}>
-                                            <img
-                                                src={`/ads/${index}.${ext}`}
-                                                alt={`Ad ${index}`}
-                                                lazy="loading"
-                                            />
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                            <Ads />
                         </>
                     ) : videos.length === 0 ? (
                         <p className="text-gray-400">
@@ -164,6 +149,7 @@ export default function Home() {
                     ) : (
                         <>
                             <h2 className="text-xl font-bold mb-4">
+                                        <Ads />
                                 {selectedBoard.name}
                             </h2>
                             <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-6">

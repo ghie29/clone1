@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import VideoPlayer from "../components/VideoPlayer";
+import Ads from "../components/Ads";
 
 export default function Watch() {
     const { slug } = useParams();
@@ -244,10 +245,11 @@ export default function Watch() {
                                 <p className="text-gray-400">
                                     {video.description}
                                 </p>
-
+                                    
                                 {/* Related Videos */}
                                 {relatedVideos.length > 0 && (
-                                    <div className="mt-8">
+                                        <div className="mt-8">
+                                            <Ads />
                                         <h3 className="text-lg font-bold mb-4">
                                             더 많은 동영상
                                         </h3>
