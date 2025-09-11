@@ -141,7 +141,7 @@ export default function Home() {
                     {!selectedBoard ? (
                         <>
                             <p className="text-gray-400"></p>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                                 {Array.from({ length: 16 }, (_, i) => {
                                     const index = i + 1;
                                     const ext = index === 9 || index === 11 || index === 12 ? "png" : "jpg";
