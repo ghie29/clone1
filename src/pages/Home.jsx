@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 
 export default function Home() {
     const { boardSlug, page: pageParam } = useParams();
@@ -108,13 +109,23 @@ export default function Home() {
                         />
                     </Link>
                 </h1>
-                <button
-                    className="md:hidden bg-gray-700 px-3 py-1 rounded"
-                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                >
-                    ☰
-                </button>
+
+                <div className="flex items-center space-x-4">
+                    {/* Search Icon */}
+                    <button className="bg-gray-700 p-2 rounded hover:bg-gray-600">
+                        <MagnifyingGlassIcon className="h-6 w-6 text-white" />
+                    </button>
+
+                    {/* Hamburger Button */}
+                    <button
+                        className="md:hidden bg-gray-700 px-3 py-1 rounded hover:bg-gray-600"
+                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    >
+                        ☰
+                    </button>
+                </div>
             </header>
+
 
             <div className="flex flex-1">
                 {/* Sidebar */}
