@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+import { MagnifyingGlassIcon, UserCircleIcon } from "@heroicons/react/24/outline";
 import Ads from "../components/Ads";
 
 export default function Home() {
@@ -16,6 +16,10 @@ export default function Home() {
     const [selectedBoard, setSelectedBoard] = useState(null);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+    // search state
+    const [searchOpen, setSearchOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+
     // pagination
     const [page, setPage] = useState(Number(pageParam) || 1);
     const [total, setTotal] = useState(0);
@@ -24,6 +28,22 @@ export default function Home() {
     useEffect(() => {
         fetchBoards();
     }, []);
+
+    useEffect(() => {
+        // reset page when search changes
+        setPage(1);
+    }, [searchQuery]);
+
+    useEffect(() => {
+        if (searchQuery.trim()) {
+            fetchSearchVideos(page);
+        } else if (selectedBoard) {
+            fetchBoardVideos(selectedBoard.id, page);
+        } else {
+            setVideos([]);
+            setTotal(0);
+        }
+    }, [selectedBoard, page, searchQuery]);
 
     useEffect(() => {
         if (boardSlug && boards.length > 0) {
@@ -36,12 +56,6 @@ export default function Home() {
         }
     }, [boardSlug, pageParam, boards]);
 
-    useEffect(() => {
-        if (selectedBoard) {
-            fetchVideos(selectedBoard.id, page);
-        }
-    }, [selectedBoard, page]);
-
     const fetchBoards = async () => {
         let { data } = await supabase
             .from("boards")
@@ -50,7 +64,7 @@ export default function Home() {
         setBoards(data || []);
     };
 
-    const fetchVideos = async (boardId, pageNum = 1) => {
+    const fetchBoardVideos = async (boardId, pageNum = 1) => {
         const from = (pageNum - 1) * PAGE_SIZE;
         const to = from + PAGE_SIZE - 1;
 
@@ -69,28 +83,54 @@ export default function Home() {
         }
     };
 
+    const fetchSearchVideos = async (pageNum = 1) => {
+        const from = (pageNum - 1) * PAGE_SIZE;
+        const to = from + PAGE_SIZE - 1;
+
+        let { data, count, error } = await supabase
+            .from("videos")
+            .select("*", { count: "exact" })
+            .or(
+                `title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`
+            )
+            .order("created_at", { ascending: false })
+            .range(from, to);
+
+        if (!error) {
+            setVideos(data || []);
+            setTotal(count || 0);
+        } else {
+            console.error(error);
+        }
+    };
+
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
     const changePage = (newPage) => {
-        if (!selectedBoard) return;
         setPage(newPage);
-        navigate(`/${selectedBoard.slug}/${newPage}`);
+        if (!searchQuery && selectedBoard) {
+            navigate(`/${selectedBoard.slug}/${newPage}`);
+        }
     };
 
     return (
         <div className="flex flex-col min-h-screen bg-gray-900 text-gray-100">
             <Helmet>
                 <title>
-                    {selectedBoard
-                        ? `${selectedBoard.name} - Page ${page} | AVKorTV`
-                        : "AVKorTV - Home"}
+                    {searchQuery
+                        ? `Search: ${searchQuery} - Page ${page} | AVKorTV`
+                        : selectedBoard
+                            ? `${selectedBoard.name} - Page ${page} | AVKorTV`
+                            : "AVKorTV - Home"}
                 </title>
                 <meta
                     name="description"
                     content={
-                        selectedBoard
-                            ? `Browse ${selectedBoard.name} videos on page ${page}. Watch the latest updates on AVKorTV.`
-                            : "Explore the latest uncensored, subbed, and Korean AV videos on AVKorTV."
+                        searchQuery
+                            ? `Search results for ${searchQuery} on AVKorTV.`
+                            : selectedBoard
+                                ? `Browse ${selectedBoard.name} videos on page ${page}. Watch the latest updates on AVKorTV.`
+                                : "Explore the latest uncensored, subbed, and Korean AV videos on AVKorTV."
                     }
                 />
                 <link
@@ -100,30 +140,70 @@ export default function Home() {
             </Helmet>
 
             {/* Header */}
-            <header className="bg-gray-800 text-white p-4 flex justify-between items-center shadow">
-                <h1 className="text-4xl font-bold">
-                    <Link to="/">
-                        <img
-                            src="/avkortv_logo.png"
-                            alt="AVKorTV Logo"
-                            className="h-10 w-auto"
-                        />
-                    </Link>
-                </h1>
+            <header className="bg-gray-800 text-white p-4 shadow">
+                <div className="flex justify-between items-center">
+                    <h1 className="text-4xl font-bold">
+                        <Link to="/">
+                            <img
+                                src="/avkortv_logo.png"
+                                alt="AVKorTV Logo"
+                                className="h-10 w-auto"
+                            />
+                        </Link>
+                    </h1>
 
-                <div className="flex items-center space-x-4">
-                    {/* Search Icon */}
-                    <button className="w-10 h-10 flex items-center justify-center bg-gray-700 rounded hover:bg-gray-600">
-                        <MagnifyingGlassIcon className="h-6 w-6 text-white" />
-                    </button>
+                    <div className="flex items-center space-x-4">
+                        {/* Search Icon */}
+                        <button
+                            onClick={() => setSearchOpen(!searchOpen)}
+                            className="w-10 h-10 flex items-center justify-center bg-gray-700 rounded hover:bg-gray-600"
+                        >
+                            <MagnifyingGlassIcon className="h-6 w-6 text-white" />
+                        </button>
 
-                    {/* Hamburger Button */}
-                    <button
-                        className="w-10 h-10 flex items-center justify-center bg-gray-700 rounded hover:bg-gray-600 md:hidden"
-                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                    >
-                        ☰
-                    </button>
+                        {/* Avatar Icon */}
+                        <button
+                            className="w-10 h-10 flex items-center justify-center bg-gray-700 rounded hover:bg-gray-600"
+                        >
+                            <UserCircleIcon className="h-6 w-6 text-white" />
+                        </button>
+
+                        {/* Hamburger Button */}
+                        <button
+                            className="w-10 h-10 flex items-center justify-center bg-gray-700 rounded hover:bg-gray-600 md:hidden"
+                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                        >
+                            ☰
+                        </button>
+                    </div>
+                </div>
+
+                {/* Desktop Search Bar */}
+                <div
+                    className={`hidden md:block transition-all duration-300 overflow-hidden ${searchOpen ? "max-h-20 mt-4" : "max-h-0"
+                        }`}
+                >
+                    <input
+                        type="text"
+                        placeholder="Search..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full p-2 rounded bg-gray-700 text-white focus:outline-none"
+                    />
+                </div>
+
+                {/* Mobile Search Bar */}
+                <div
+                    className={`md:hidden transition-all duration-300 overflow-hidden ${searchOpen ? "max-h-20 mt-4" : "max-h-0"
+                        }`}
+                >
+                    <input
+                        type="text"
+                        placeholder="Search..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full p-2 rounded bg-gray-700 text-white focus:outline-none"
+                    />
                 </div>
             </header>
 
@@ -138,20 +218,28 @@ export default function Home() {
 
                 {/* Main */}
                 <main className="flex-1 p-4">
-                    {!selectedBoard ? (
-                        <>
-                            <Ads />
-                        </>
+                    {!selectedBoard && !searchQuery ? (
+                        <Ads />
                     ) : videos.length === 0 ? (
                         <p className="text-gray-400">
-                            No videos found in {selectedBoard.name}.
+                            {searchQuery
+                                ? `No videos found for "${searchQuery}".`
+                                : `No videos found in ${selectedBoard?.name}.`}
                         </p>
                     ) : (
                         <>
-                            <h2 className="text-xl font-bold mb-4">
-                                        <Ads />
-                                {selectedBoard.name}
-                            </h2>
+                            <Ads />
+
+                            {searchQuery ? (
+                                <h2 className="text-xl font-bold mb-4">
+                                    Search results for "{searchQuery}"
+                                </h2>
+                            ) : (
+                                <h2 className="text-xl font-bold mb-4">
+                                    {selectedBoard?.name}
+                                </h2>
+                            )}
+
                             <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-6">
                                 {videos.map((v) => (
                                     <div
@@ -229,8 +317,11 @@ export default function Home() {
             </div>
 
             {/* Footer */}
-            <footer className="bg-gray-800 text-center p-4 text-sm text-gray-400">
-                © {new Date().getFullYear()} AVKorTV. All rights reserved.
+            <footer className="bg-gray-800 text-center p-4 text-sm text-gray-400 space-y-2">
+                <p>© {new Date().getFullYear()} AVKorTV. All rights reserved.</p>
+                <p className="text-xs text-gray-500">
+                    Disclaimer: AVKorTV does not own or host any videos or files. All content is provided by third-party services.
+                </p>
             </footer>
         </div>
     );

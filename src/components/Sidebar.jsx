@@ -75,13 +75,15 @@ export default function Sidebar({
                     </Link>
                 </li>
                 <li>
-                    <Link
-                        to="/qna"
+                    <a
+                        href="https://t.me/sunmoa144"
+                        target="_blank"
+                        rel="noopener noreferrer"
                         onClick={() => setMobileMenuOpen(false)}
                         className="block w-full text-left px-2 py-1 rounded hover:bg-gray-700 font-semibold"
                     >
-                        1:1 QnA
-                    </Link>
+                        Banner Inquiry
+                    </a>
                 </li>
             </ul>
         </aside>
