@@ -116,6 +116,22 @@ export default function Watch() {
             return <VideoPlayer key={video.slug} src={url} fluid={true} />;
         }
 
+        // Special handling for 9xplayer.com
+        if (url.includes("9xplayer.com")) {
+            return (
+                <iframe
+                    key={video.slug}
+                    src={url}
+                    title={video.title}
+                    className="w-full h-full"
+                    frameBorder="0"
+                    allowFullScreen
+                    sandbox="allow-same-origin allow-scripts" // no popups, no forms, no top navigation
+                />
+            );
+        }
+
+        // Default iframe
         return (
             <iframe
                 key={video.slug}
@@ -127,6 +143,7 @@ export default function Watch() {
             />
         );
     };
+
 
     // JSON-LD
     const videoJsonLd = video
@@ -140,13 +157,13 @@ export default function Watch() {
             thumbnailUrl: [video.thumbnail_url],
             uploadDate: video.created_at || new Date().toISOString(),
             contentUrl: video.video_url,
-            embedUrl: `https://yourdomain.com/watch/${video.slug}`,
+            embedUrl: `https://redbang.xyz/watch/${video.slug}`,
             publisher: {
                 "@type": "Organization",
                 name: "AVKorTV",
                 logo: {
                     "@type": "ImageObject",
-                    url: "https://yourdomain.com/logo.png",
+                    url: "https://redbang.xyz/avkortv_logo.png",
                 },
             },
         }
