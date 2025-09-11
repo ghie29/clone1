@@ -118,16 +118,16 @@ export default function Home() {
             <Helmet>
                 <title>
                     {searchQuery
-                        ? `Search: ${searchQuery} - Page ${page} | AVKorTV`
+                        ? `Search: ${searchQuery} - Page ${page} | AVKorTV: K-XXX Like Never Before`
                         : selectedBoard
-                            ? `${selectedBoard.name} - Page ${page} | AVKorTV`
-                            : "AVKorTV - Home"}
+                            ? `${selectedBoard.name} - Page ${page} | AVKorTV: K-XXX Like Never Before`
+                            : "AVKorTV: K-XXX Like Never Before"}
                 </title>
                 <meta
                     name="description"
                     content={
                         searchQuery
-                            ? `Search results for ${searchQuery} on AVKorTV.`
+                            ? `Search results for ${searchQuery} on AVKorTV: K-XXX Like Never Before.`
                             : selectedBoard
                                 ? `Browse ${selectedBoard.name} videos on page ${page}. Watch the latest updates on AVKorTV.`
                                 : "Watch the newest uncensored Korean AV videos with English subtitles. Stream exclusive K-adult content now on AVKorTV."
