@@ -178,19 +178,19 @@ export default function Watch() {
             <Helmet>
                 <title>
                     {searchQuery
-                        ? `Search: ${searchQuery} - Page ${page} | AVKorTV`
+                        ? `Search: ${searchQuery} - Page ${page} | AVKorTV: K-XXX Like Never Before`
                         : video
-                            ? `${video.title} | AVKorTV`
-                            : "Watch | AVKorTV"}
+                            ? `${video.title} | AVKorTV: K-XXX Like Never Before`
+                            : "Watch | AVKorTV: K-XXX Like Never Before"}
                 </title>
                 <meta
                     name="description"
                     content={
                         searchQuery
-                            ? `Search results for ${searchQuery} on AVKorTV.`
+                            ? `Search results for ${searchQuery} on AVKorTV: K-XXX Like Never Before.`
                             : video?.description ||
                             (video
-                                ? `Watch ${video.title} online on AVKorTV.`
+                                ? `Watch ${video.title} online on AVKorTV: K-XXX Like Never Before.`
                                 : "Stay updated with the newest Korean AV content — uncensored and subtitled, only at AVKorTV.")
                     }
                 />
