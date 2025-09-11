@@ -109,19 +109,17 @@ export default function Watch() {
 
     const renderPlayer = () => {
         if (!video?.video_url) return null;
-
         const url = video.video_url.trim();
+
+        if (url.endsWith(".m3u8") || url.endsWith(".mp4")) {
+            return <VideoPlayer key={video.slug} src={url} fluid={true} />;
+        }
+
         let hostname = "";
         try {
             hostname = new URL(url).hostname;
         } catch (e) {
-            console.error("Invalid URL:", url, e);
-        }
-
-        console.log("Video URL:", url, "Hostname:", hostname);
-
-        if (url.endsWith(".m3u8") || url.endsWith(".mp4")) {
-            return <VideoPlayer key={video.slug} src={url} fluid={true} />;
+            console.error("Bad video_url:", url);
         }
 
         if (hostname.includes("9xplayer.com")) {
@@ -149,6 +147,7 @@ export default function Watch() {
             />
         );
     };
+
 
     // JSON-LD
     const videoJsonLd = video

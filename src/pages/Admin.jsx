@@ -32,82 +32,6 @@ export default function Admin() {
     const [editingId, setEditingId] = useState(null);
     const [editingData, setEditingData] = useState({});
 
-    // ---------- AUTH EFFECT ----------
-    useEffect(() => {
-        const getSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            setUser(session?.user || null);
-            setLoading(false);
-        };
-
-        getSession();
-
-        const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user || null);
-        });
-
-        return () => listener.subscription.unsubscribe();
-    }, []);
-
-    // ---------- BOARDS EFFECT ----------
-    useEffect(() => {
-        fetchBoards();
-    }, []);
-
-    // ---------- VIDEOS EFFECT ----------
-    useEffect(() => {
-        fetchVideos();
-    }, [search, page, boards]);
-
-    // ---------- AUTH FUNCS ----------
-    const handleLogin = async (e) => {
-        e.preventDefault();
-        setAuthError("");
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) setAuthError(error.message);
-    };
-
-    const handleLogout = async () => {
-        await supabase.auth.signOut();
-        setUser(null);
-    };
-
-    if (loading) return <p className="p-6">Loading...</p>;
-
-    // ---------- LOGIN SCREEN ----------
-    if (!user) {
-        return (
-            <div className="flex items-center justify-center min-h-screen bg-gray-100">
-                <div className="bg-white p-6 rounded shadow-md w-full max-w-sm">
-                    <h2 className="text-xl font-bold mb-4">Admin Login</h2>
-                    {authError && <p className="text-red-500 text-sm mb-3">{authError}</p>}
-                    <form onSubmit={handleLogin} className="space-y-3">
-                        <input
-                            type="email"
-                            className="border w-full px-3 py-2 rounded"
-                            placeholder="Email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                        />
-                        <input
-                            type="password"
-                            className="border w-full px-3 py-2 rounded"
-                            placeholder="Password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
-                        <button
-                            type="submit"
-                            className="bg-blue-500 text-white w-full py-2 rounded hover:bg-blue-600"
-                        >
-                            Login
-                        </button>
-                    </form>
-                </div>
-            </div>
-        );
-    }
-
     // ---------- HELPERS ----------
     const slugifyKorean = (text) => {
         return text
@@ -145,12 +69,14 @@ export default function Admin() {
 
         const newPosition = maxBoard ? maxBoard.position + 1 : 0;
 
-        await supabase.from("boards").insert([{
-            name: boardName,
-            slug,
-            position: newPosition,
-            category: boardCategory || null,
-        }]);
+        await supabase.from("boards").insert([
+            {
+                name: boardName,
+                slug,
+                position: newPosition,
+                category: boardCategory || null,
+            },
+        ]);
 
         setBoardName("");
         setBoardCategory("");
@@ -173,16 +99,19 @@ export default function Admin() {
         const currentBoard = boards[index];
         const swapBoard = boards[swapIndex];
 
-        await supabase.from("boards")
+        await supabase
+            .from("boards")
             .update({ position: swapBoard.position })
             .eq("id", currentBoard.id);
 
-        await supabase.from("boards")
+        await supabase
+            .from("boards")
             .update({ position: currentBoard.position })
             .eq("id", swapBoard.id);
 
         fetchBoards();
     };
+
     // ---------- VIDEOS FUNCS ----------
     const fetchVideos = async () => {
         const from = (page - 1) * PAGE_SIZE;
@@ -226,7 +155,14 @@ export default function Admin() {
         };
 
         await supabase.from("videos").insert([payload]);
-        setNewVideo({ title: "", description: "", board_id: "", video_url: "", thumbnail_url: "", slug: "" });
+        setNewVideo({
+            title: "",
+            description: "",
+            board_id: "",
+            video_url: "",
+            thumbnail_url: "",
+            slug: "",
+        });
         setPage(1);
         fetchVideos();
     };
@@ -276,7 +212,12 @@ export default function Admin() {
 
     const deleteSelected = async () => {
         if (selectedIds.length === 0) return;
-        if (!confirm(`Delete ${selectedIds.length} selected videos? This cannot be undone.`)) return;
+        if (
+            !confirm(
+                `Delete ${selectedIds.length} selected videos? This cannot be undone.`
+            )
+        )
+            return;
         await supabase.from("videos").delete().in("id", selectedIds);
         setSelectedIds([]);
         fetchVideos();
@@ -294,7 +235,92 @@ export default function Admin() {
         setPage(p);
     };
 
-    // ---------- RETURN UI ----------
+    // ---------- AUTH EFFECT ----------
+    useEffect(() => {
+        const getSession = async () => {
+            const {
+                data: { session },
+            } = await supabase.auth.getSession();
+            setUser(session?.user || null);
+            setLoading(false);
+        };
+
+        getSession();
+
+        const { data: listener } = supabase.auth.onAuthStateChange(
+            (_event, session) => {
+                setUser(session?.user || null);
+            }
+        );
+
+        return () => listener.subscription.unsubscribe();
+    }, []);
+
+    // ---------- BOARDS EFFECT ----------
+    useEffect(() => {
+        fetchBoards();
+    }, []);
+
+    // ---------- VIDEOS EFFECT ----------
+    useEffect(() => {
+        fetchVideos();
+    }, [search, page, boards]);
+
+    // ---------- LOGIN ----------
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        setAuthError("");
+        const { error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        });
+        if (error) setAuthError(error.message);
+    };
+
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        setUser(null);
+    };
+
+    // ---------- RENDER ----------
+    if (loading) return <p className="p-6">Loading...</p>;
+
+    if (!user) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gray-100">
+                <div className="bg-white p-6 rounded shadow-md w-full max-w-sm">
+                    <h2 className="text-xl font-bold mb-4">Admin Login</h2>
+                    {authError && (
+                        <p className="text-red-500 text-sm mb-3">{authError}</p>
+                    )}
+                    <form onSubmit={handleLogin} className="space-y-3">
+                        <input
+                            type="email"
+                            className="border w-full px-3 py-2 rounded"
+                            placeholder="Email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+                        <input
+                            type="password"
+                            className="border w-full px-3 py-2 rounded"
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                        <button
+                            type="submit"
+                            className="bg-blue-500 text-white w-full py-2 rounded hover:bg-blue-600"
+                        >
+                            Login
+                        </button>
+                    </form>
+                </div>
+            </div>
+        );
+    }
+
+    // ---------- DASHBOARD ----------
     return (
         <div className="p-6">
             <div className="flex justify-between items-center mb-6">
@@ -307,9 +333,10 @@ export default function Admin() {
                 </button>
             </div>
 
-            <div className="grid gap-8 md:grid-cols-2">
-                {/* Boards Section */}
-                <div>
+            {/* Two Halves */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* LEFT HALF: Boards */}
+                <div className="bg-white rounded-lg shadow p-4">
                     <h2 className="text-xl font-bold mb-2">Boards</h2>
                     <div className="flex gap-2 mb-4">
                         <input
@@ -334,7 +361,10 @@ export default function Admin() {
 
                     <ul className="space-y-2">
                         {boards.map((b, idx) => (
-                            <li key={b.id} className="flex items-center justify-between border p-2 rounded">
+                            <li
+                                key={b.id}
+                                className="flex items-center justify-between border p-2 rounded"
+                            >
                                 <div className="flex-1 flex gap-2">
                                     <input
                                         className="border px-2 py-1 flex-1"
@@ -370,8 +400,8 @@ export default function Admin() {
                     </ul>
                 </div>
 
-                {/* Videos Section */}
-                <div>
+                {/* RIGHT HALF: Videos */}
+                <div className="bg-white rounded-lg shadow p-4">
                     <h2 className="text-xl font-bold mb-2">Videos</h2>
 
                     {/* Add Video Form */}
@@ -380,24 +410,32 @@ export default function Admin() {
                             className="border px-2 py-1 w-full"
                             placeholder="Title"
                             value={newVideo.title}
-                            onChange={(e) => setNewVideo({ ...newVideo, title: e.target.value })}
+                            onChange={(e) =>
+                                setNewVideo({ ...newVideo, title: e.target.value })
+                            }
                         />
                         <input
                             className="border px-2 py-1 w-full"
                             placeholder="Slug (optional)"
                             value={newVideo.slug}
-                            onChange={(e) => setNewVideo({ ...newVideo, slug: e.target.value })}
+                            onChange={(e) =>
+                                setNewVideo({ ...newVideo, slug: e.target.value })
+                            }
                         />
                         <textarea
                             className="border px-2 py-1 w-full"
                             placeholder="Description"
                             value={newVideo.description}
-                            onChange={(e) => setNewVideo({ ...newVideo, description: e.target.value })}
+                            onChange={(e) =>
+                                setNewVideo({ ...newVideo, description: e.target.value })
+                            }
                         />
                         <select
                             className="border px-2 py-1 w-full"
                             value={newVideo.board_id}
-                            onChange={(e) => setNewVideo({ ...newVideo, board_id: e.target.value })}
+                            onChange={(e) =>
+                                setNewVideo({ ...newVideo, board_id: e.target.value })
+                            }
                         >
                             <option value="">Select board</option>
                             {boards.map((b) => (
@@ -410,13 +448,17 @@ export default function Admin() {
                             className="border px-2 py-1 w-full"
                             placeholder="Video URL (iframe/mp4/m3u8)"
                             value={newVideo.video_url}
-                            onChange={(e) => setNewVideo({ ...newVideo, video_url: e.target.value })}
+                            onChange={(e) =>
+                                setNewVideo({ ...newVideo, video_url: e.target.value })
+                            }
                         />
                         <input
                             className="border px-2 py-1 w-full"
                             placeholder="Thumbnail URL"
                             value={newVideo.thumbnail_url}
-                            onChange={(e) => setNewVideo({ ...newVideo, thumbnail_url: e.target.value })}
+                            onChange={(e) =>
+                                setNewVideo({ ...newVideo, thumbnail_url: e.target.value })
+                            }
                         />
                         <div className="flex gap-2">
                             <button
@@ -428,7 +470,7 @@ export default function Admin() {
                         </div>
                     </div>
 
-                    {/* Search & bulk actions */}
+                    {/* Search & Bulk Actions */}
                     <div className="flex items-center gap-2 mb-3">
                         <input
                             type="checkbox"
@@ -454,10 +496,13 @@ export default function Admin() {
                         </button>
                     </div>
 
-                    {/* Videos list */}
+                    {/* Videos List */}
                     <div className="space-y-2">
                         {videos.map((v) => (
-                            <div key={v.id} className="border p-2 rounded flex gap-3 items-start">
+                            <div
+                                key={v.id}
+                                className="border p-2 rounded flex gap-3 items-start"
+                            >
                                 <input
                                     type="checkbox"
                                     checked={selectedIds.includes(v.id)}
@@ -466,7 +511,11 @@ export default function Admin() {
                                 />
                                 <div className="w-28 h-20 flex-shrink-0 overflow-hidden rounded bg-gray-100">
                                     {v.thumbnail_url ? (
-                                        <img src={v.thumbnail_url} alt={v.title} className="w-full h-full object-cover" />
+                                        <img
+                                            src={v.thumbnail_url}
+                                            alt={v.title}
+                                            className="w-full h-full object-cover"
+                                        />
                                     ) : (
                                         <div className="w-full h-full bg-gray-200 flex items-center justify-center text-sm text-gray-600">
                                             No Thumbnail
@@ -480,23 +529,43 @@ export default function Admin() {
                                             <input
                                                 className="border px-2 py-1 w-full"
                                                 value={editingData.title}
-                                                onChange={(e) => setEditingData({ ...editingData, title: e.target.value })}
+                                                onChange={(e) =>
+                                                    setEditingData({
+                                                        ...editingData,
+                                                        title: e.target.value,
+                                                    })
+                                                }
                                             />
                                             <input
                                                 className="border px-2 py-1 w-full"
                                                 value={editingData.slug}
-                                                onChange={(e) => setEditingData({ ...editingData, slug: e.target.value })}
+                                                onChange={(e) =>
+                                                    setEditingData({
+                                                        ...editingData,
+                                                        slug: e.target.value,
+                                                    })
+                                                }
                                                 placeholder="slug"
                                             />
                                             <textarea
                                                 className="border px-2 py-1 w-full"
                                                 value={editingData.description}
-                                                onChange={(e) => setEditingData({ ...editingData, description: e.target.value })}
+                                                onChange={(e) =>
+                                                    setEditingData({
+                                                        ...editingData,
+                                                        description: e.target.value,
+                                                    })
+                                                }
                                             />
                                             <select
                                                 className="border px-2 py-1 w-full"
                                                 value={editingData.board_id}
-                                                onChange={(e) => setEditingData({ ...editingData, board_id: e.target.value })}
+                                                onChange={(e) =>
+                                                    setEditingData({
+                                                        ...editingData,
+                                                        board_id: e.target.value,
+                                                    })
+                                                }
                                             >
                                                 <option value="">Select board</option>
                                                 {boards.map((b) => (
@@ -508,14 +577,24 @@ export default function Admin() {
                                             <input
                                                 className="border px-2 py-1 w-full"
                                                 value={editingData.video_url}
-                                                onChange={(e) => setEditingData({ ...editingData, video_url: e.target.value })}
-                                                placeholder="video url"
+                                                onChange={(e) =>
+                                                    setEditingData({
+                                                        ...editingData,
+                                                        video_url: e.target.value,
+                                                    })
+                                                }
+                                                placeholder="Video URL"
                                             />
                                             <input
                                                 className="border px-2 py-1 w-full"
                                                 value={editingData.thumbnail_url}
-                                                onChange={(e) => setEditingData({ ...editingData, thumbnail_url: e.target.value })}
-                                                placeholder="thumbnail url"
+                                                onChange={(e) =>
+                                                    setEditingData({
+                                                        ...editingData,
+                                                        thumbnail_url: e.target.value,
+                                                    })
+                                                }
+                                                placeholder="Thumbnail URL"
                                             />
                                             <div className="flex gap-2">
                                                 <button
@@ -525,8 +604,8 @@ export default function Admin() {
                                                     Save
                                                 </button>
                                                 <button
-                                                    className="bg-gray-300 px-3 py-1 rounded"
-                                                    onClick={() => { setEditingId(null); setEditingData({}); }}
+                                                    className="bg-gray-400 text-white px-3 py-1 rounded"
+                                                    onClick={() => setEditingId(null)}
                                                 >
                                                     Cancel
                                                 </button>
@@ -534,30 +613,25 @@ export default function Admin() {
                                         </div>
                                     ) : (
                                         <>
-                                            <div className="flex justify-between items-start">
-                                                <div>
-                                                    <p className="font-semibold">{v.title}</p>
-                                                    <p className="text-sm text-gray-600">Board: {v.boards?.name}</p>
-                                                    <p className="text-sm text-gray-500">/{v.slug}</p>
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    <button
-                                                        className="px-2 py-1 bg-yellow-300 rounded"
-                                                        onClick={() => startEdit(v)}
-                                                    >
-                                                        Edit
-                                                    </button>
-                                                    <button
-                                                        className="px-2 py-1 bg-red-500 text-white rounded"
-                                                        onClick={() => deleteVideo(v.id)}
-                                                    >
-                                                        Delete
-                                                    </button>
-                                                </div>
+                                            <h3 className="font-semibold">{v.title}</h3>
+                                            <p className="text-sm text-gray-600">
+                                                Board: {v.boards?.name || "Unassigned"}
+                                            </p>
+                                            <p className="text-xs text-gray-500">{v.slug}</p>
+                                            <div className="flex gap-2 mt-2">
+                                                <button
+                                                    className="bg-yellow-400 text-white px-3 py-1 rounded"
+                                                    onClick={() => startEdit(v)}
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    className="bg-red-500 text-white px-3 py-1 rounded"
+                                                    onClick={() => deleteVideo(v.id)}
+                                                >
+                                                    Delete
+                                                </button>
                                             </div>
-                                            <a href={v.video_url} target="_blank" rel="noreferrer" className="text-blue-600 underline text-sm">
-                                                Open source URL
-                                            </a>
                                         </>
                                     )}
                                 </div>
@@ -566,42 +640,24 @@ export default function Admin() {
                     </div>
 
                     {/* Pagination */}
-                    <div className="flex items-center justify-between mt-4">
-                        <div>
-                            <p className="text-sm text-gray-600">
-                                Showing page {page} of {totalPages} — {total || 0} total
-                            </p>
-                        </div>
-                        <div className="flex gap-2">
-                            <button
-                                className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-                                onClick={() => goToPage(1)}
-                                disabled={page === 1}
-                            >
-                                {"<<"}
-                            </button>
-                            <button
-                                className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-                                onClick={() => goToPage(page - 1)}
-                                disabled={page === 1}
-                            >
-                                Prev
-                            </button>
-                            <button
-                                className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-                                onClick={() => goToPage(page + 1)}
-                                disabled={page === totalPages}
-                            >
-                                Next
-                            </button>
-                            <button
-                                className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-                                onClick={() => goToPage(totalPages)}
-                                disabled={page === totalPages}
-                            >
-                                {">>"}
-                            </button>
-                        </div>
+                    <div className="flex justify-between items-center mt-4">
+                        <button
+                            className="px-3 py-1 border rounded disabled:opacity-50"
+                            onClick={() => goToPage(page - 1)}
+                            disabled={page === 1}
+                        >
+                            Prev
+                        </button>
+                        <span>
+                            Page {page} of {totalPages}
+                        </span>
+                        <button
+                            className="px-3 py-1 border rounded disabled:opacity-50"
+                            onClick={() => goToPage(page + 1)}
+                            disabled={page === totalPages}
+                        >
+                            Next
+                        </button>
                     </div>
                 </div>
             </div>
