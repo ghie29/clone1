@@ -148,6 +148,7 @@ export default function Home() {
                                 src="/avkortv_logo.png"
                                 alt="AVKorTV Logo"
                                 className="h-10 w-auto"
+                                loading="lazy"
                             />
                         </Link>
                     </h1>
@@ -224,7 +225,7 @@ export default function Home() {
                         <p className="text-gray-400">
                             {searchQuery
                                 ? `No videos found for "${searchQuery}".`
-                                : `No videos found in ${selectedBoard?.name}.`}
+                                : `Please wait to load the Videos in ${selectedBoard?.name}.`}
                         </p>
                     ) : (
                         <>

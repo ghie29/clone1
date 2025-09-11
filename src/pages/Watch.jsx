@@ -391,7 +391,7 @@ export default function Watch() {
                                 <div className="mt-8">
                                     <Ads />
                                     <h3 className="text-lg font-bold mb-4">
-                                        더 많은 동영상
+                                                Related Videos
                                     </h3>
                                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
                                         {relatedVideos.map((rv) => (
