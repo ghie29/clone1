@@ -130,7 +130,7 @@ export default function Home() {
                             ? `Search results for ${searchQuery} on AVKorTV.`
                             : selectedBoard
                                 ? `Browse ${selectedBoard.name} videos on page ${page}. Watch the latest updates on AVKorTV.`
-                                : "Explore the latest uncensored, subbed, and Korean AV videos on AVKorTV."
+                                : "Watch the newest uncensored Korean AV videos with English subtitles. Stream exclusive K-adult content now on AVKorTV."
                     }
                 />
                 <link

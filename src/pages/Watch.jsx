@@ -191,7 +191,7 @@ export default function Watch() {
                             : video?.description ||
                             (video
                                 ? `Watch ${video.title} online on AVKorTV.`
-                                : "Watch the latest videos on AVKorTV.")
+                                : "Stay updated with the newest Korean AV content — uncensored and subtitled, only at AVKorTV.")
                     }
                 />
                 <link
