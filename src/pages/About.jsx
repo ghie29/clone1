@@ -30,7 +30,7 @@ export default function About() {
                 />
                 <link
                     rel="canonical"
-                    href={`https://yourdomain.com${location.pathname}`}
+                    href={`https://redbang.xyz${location.pathname}`}
                 />
             </Helmet>
 

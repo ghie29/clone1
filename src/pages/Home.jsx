@@ -135,7 +135,7 @@ export default function Home() {
                 />
                 <link
                     rel="canonical"
-                    href={`https://yourdomain.com${location.pathname}`}
+                    href={`https://redbang.xyz${location.pathname}`}
                 />
             </Helmet>
 

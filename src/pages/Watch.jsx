@@ -175,7 +175,7 @@ export default function Watch() {
                 />
                 <link
                     rel="canonical"
-                    href={`https://yourdomain.com${location.pathname}`}
+                    href={`https://redbang.xyz${location.pathname}`}
                 />
                 {videoJsonLd && (
                     <script type="application/ld+json">

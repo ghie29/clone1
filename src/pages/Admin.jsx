@@ -2,11 +2,19 @@
 import { supabase } from "../supabaseClient";
 
 export default function Admin() {
-    // Boards
+    // ---------- AUTH ----------
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [authError, setAuthError] = useState("");
+
+    // ---------- BOARDS ----------
     const [boards, setBoards] = useState([]);
     const [boardName, setBoardName] = useState("");
+    const [boardCategory, setBoardCategory] = useState("");
 
-    // Videos & controls
+    // ---------- VIDEOS ----------
     const [videos, setVideos] = useState([]);
     const [newVideo, setNewVideo] = useState({
         title: "",
@@ -16,7 +24,6 @@ export default function Admin() {
         thumbnail_url: "",
         slug: "",
     });
-
     const [search, setSearch] = useState("");
     const [page, setPage] = useState(1);
     const PAGE_SIZE = 20;
@@ -24,17 +31,93 @@ export default function Admin() {
     const [selectedIds, setSelectedIds] = useState([]);
     const [editingId, setEditingId] = useState(null);
     const [editingData, setEditingData] = useState({});
-    const [boardCategory, setBoardCategory] = useState("");
 
+    // ---------- AUTH EFFECT ----------
+    useEffect(() => {
+        const getSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            setUser(session?.user || null);
+            setLoading(false);
+        };
+
+        getSession();
+
+        const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user || null);
+        });
+
+        return () => listener.subscription.unsubscribe();
+    }, []);
+
+    // ---------- BOARDS EFFECT ----------
     useEffect(() => {
         fetchBoards();
     }, []);
 
+    // ---------- VIDEOS EFFECT ----------
     useEffect(() => {
         fetchVideos();
     }, [search, page, boards]);
 
-    // ---------- BOARDS ----------
+    // ---------- AUTH FUNCS ----------
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        setAuthError("");
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) setAuthError(error.message);
+    };
+
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        setUser(null);
+    };
+
+    if (loading) return <p className="p-6">Loading...</p>;
+
+    // ---------- LOGIN SCREEN ----------
+    if (!user) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gray-100">
+                <div className="bg-white p-6 rounded shadow-md w-full max-w-sm">
+                    <h2 className="text-xl font-bold mb-4">Admin Login</h2>
+                    {authError && <p className="text-red-500 text-sm mb-3">{authError}</p>}
+                    <form onSubmit={handleLogin} className="space-y-3">
+                        <input
+                            type="email"
+                            className="border w-full px-3 py-2 rounded"
+                            placeholder="Email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+                        <input
+                            type="password"
+                            className="border w-full px-3 py-2 rounded"
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                        <button
+                            type="submit"
+                            className="bg-blue-500 text-white w-full py-2 rounded hover:bg-blue-600"
+                        >
+                            Login
+                        </button>
+                    </form>
+                </div>
+            </div>
+        );
+    }
+
+    // ---------- HELPERS ----------
+    const slugifyKorean = (text) => {
+        return text
+            .toLowerCase()
+            .trim()
+            .replace(/\s+/g, "-")
+            .replace(/[^a-z0-9가-힣-]/g, "");
+    };
+
+    // ---------- BOARDS FUNCS ----------
     const fetchBoards = async () => {
         let { data, error } = await supabase
             .from("boards")
@@ -46,16 +129,7 @@ export default function Admin() {
             setBoards([]);
             return;
         }
-
         setBoards(data || []);
-    };
-
-    const slugifyKorean = (text) => {
-        return text
-            .toLowerCase()
-            .trim()
-            .replace(/\s+/g, "-") // spaces → dash
-            .replace(/[^a-z0-9가-힣-]/g, ""); // keep Korean, English, numbers, dashes
     };
 
     const addBoard = async () => {
@@ -75,7 +149,7 @@ export default function Admin() {
             name: boardName,
             slug,
             position: newPosition,
-            category: boardCategory || null, // ✅ category support
+            category: boardCategory || null,
         }]);
 
         setBoardName("");
@@ -109,9 +183,7 @@ export default function Admin() {
 
         fetchBoards();
     };
-
-
-    // ---------- VIDEOS ----------
+    // ---------- VIDEOS FUNCS ----------
     const fetchVideos = async () => {
         const from = (page - 1) * PAGE_SIZE;
         const to = from + PAGE_SIZE - 1;
@@ -140,7 +212,9 @@ export default function Admin() {
 
     const addVideo = async () => {
         if (!newVideo.title || !newVideo.video_url || !newVideo.board_id) return;
-        const slug = newVideo.slug?.trim() ? slugifyKorean(newVideo.slug) : slugifyKorean(newVideo.title);
+        const slug = newVideo.slug?.trim()
+            ? slugifyKorean(newVideo.slug)
+            : slugifyKorean(newVideo.title);
 
         const payload = {
             title: newVideo.title,
@@ -176,7 +250,9 @@ export default function Admin() {
             video_url: editingData.video_url,
             thumbnail_url: editingData.thumbnail_url || null,
             board_id: editingData.board_id,
-            slug: editingData.slug ? slugifyKorean(editingData.slug) : slugifyKorean(editingData.title),
+            slug: editingData.slug
+                ? slugifyKorean(editingData.slug)
+                : slugifyKorean(editingData.title),
         };
         await supabase.from("videos").update(payload).eq("id", id);
         setEditingId(null);
@@ -185,14 +261,16 @@ export default function Admin() {
     };
 
     const toggleSelect = (id) => {
-        setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+        setSelectedIds((prev) =>
+            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+        );
     };
 
     const toggleSelectAll = () => {
         if (selectedIds.length === videos.length) {
-            setSelectedIds([]); // unselect all
+            setSelectedIds([]);
         } else {
-            setSelectedIds(videos.map((v) => v.id)); // select all
+            setSelectedIds(videos.map((v) => v.id));
         }
     };
 
@@ -216,8 +294,19 @@ export default function Admin() {
         setPage(p);
     };
 
+    // ---------- RETURN UI ----------
     return (
         <div className="p-6">
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+                <button
+                    onClick={handleLogout}
+                    className="bg-red-500 text-white px-3 py-1 rounded"
+                >
+                    Logout
+                </button>
+            </div>
+
             <div className="grid gap-8 md:grid-cols-2">
                 {/* Boards Section */}
                 <div>
@@ -235,7 +324,10 @@ export default function Admin() {
                             value={boardCategory}
                             onChange={(e) => setBoardCategory(e.target.value)}
                         />
-                        <button className="bg-green-500 text-white px-3 rounded" onClick={addBoard}>
+                        <button
+                            className="bg-green-500 text-white px-3 rounded"
+                            onClick={addBoard}
+                        >
                             Add
                         </button>
                     </div>
@@ -327,7 +419,10 @@ export default function Admin() {
                             onChange={(e) => setNewVideo({ ...newVideo, thumbnail_url: e.target.value })}
                         />
                         <div className="flex gap-2">
-                            <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={addVideo}>
+                            <button
+                                className="bg-blue-500 text-white px-4 py-2 rounded"
+                                onClick={addVideo}
+                            >
                                 Add Video
                             </button>
                         </div>
@@ -423,10 +518,16 @@ export default function Admin() {
                                                 placeholder="thumbnail url"
                                             />
                                             <div className="flex gap-2">
-                                                <button className="bg-green-500 text-white px-3 py-1 rounded" onClick={() => saveEdit(v.id)}>
+                                                <button
+                                                    className="bg-green-500 text-white px-3 py-1 rounded"
+                                                    onClick={() => saveEdit(v.id)}
+                                                >
                                                     Save
                                                 </button>
-                                                <button className="bg-gray-300 px-3 py-1 rounded" onClick={() => { setEditingId(null); setEditingData({}); }}>
+                                                <button
+                                                    className="bg-gray-300 px-3 py-1 rounded"
+                                                    onClick={() => { setEditingId(null); setEditingData({}); }}
+                                                >
                                                     Cancel
                                                 </button>
                                             </div>
@@ -440,10 +541,16 @@ export default function Admin() {
                                                     <p className="text-sm text-gray-500">/{v.slug}</p>
                                                 </div>
                                                 <div className="flex gap-2">
-                                                    <button className="px-2 py-1 bg-yellow-300 rounded" onClick={() => startEdit(v)}>
+                                                    <button
+                                                        className="px-2 py-1 bg-yellow-300 rounded"
+                                                        onClick={() => startEdit(v)}
+                                                    >
                                                         Edit
                                                     </button>
-                                                    <button className="px-2 py-1 bg-red-500 text-white rounded" onClick={() => deleteVideo(v.id)}>
+                                                    <button
+                                                        className="px-2 py-1 bg-red-500 text-white rounded"
+                                                        onClick={() => deleteVideo(v.id)}
+                                                    >
                                                         Delete
                                                     </button>
                                                 </div>
@@ -465,7 +572,6 @@ export default function Admin() {
                                 Showing page {page} of {totalPages} — {total || 0} total
                             </p>
                         </div>
-
                         <div className="flex gap-2">
                             <button
                                 className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
