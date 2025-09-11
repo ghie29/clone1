@@ -166,6 +166,7 @@ export default function Home() {
                                                 <img
                                                     src={v.thumbnail_url}
                                                     alt={v.title}
+                                                    loading="lazy"
                                                     className="w-full h-40 object-cover"
                                                 />
                                             ) : (

@@ -138,6 +138,7 @@ export default function Watch() {
                         <img
                             src="/avkortv_logo.png"
                             alt="AVKorTV Logo"
+                            loading="lazy"
                             className="h-10 w-auto"
                         />
                     </Link>
