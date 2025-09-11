@@ -424,14 +424,30 @@ export default function Watch() {
                 <aside className="hidden lg:block w-[300px] bg-gray-800 border-l border-gray-700 p-4">
                     <h2 className="font-bold text-gray-300 mb-2">배너</h2>
                     <div className="space-y-4">
-                        <div className="bg-gray-700 h-60 flex items-center justify-center text-gray-400">
-                            배너 광고 1
+                        {/* Banner 1 - JuicyAds */}
+                        <div className="bg-gray-700 flex items-center justify-center text-gray-400">
+                            <ins id="1078510" data-width="300" data-height="250"></ins>
+                            <script
+                                dangerouslySetInnerHTML={{
+                                    __html: `
+            (adsbyjuicy = window.adsbyjuicy || []).push({'adzone':1078510});
+          `,
+                                }}
+                            />
+                            <script
+                                src="https://poweredby.jads.co/js/jads.js"
+                                async
+                                data-cfasync="false"
+                            />
                         </div>
+
+                        {/* Banner 2 - Placeholder */}
                         <div className="bg-gray-700 h-60 flex items-center justify-center text-gray-400">
-                            배너 광고 2
+                            배너 광고
                         </div>
                     </div>
                 </aside>
+
             </div>
 
             {/* Footer */}
