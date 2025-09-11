@@ -139,7 +139,24 @@ export default function Home() {
                 {/* Main */}
                 <main className="flex-1 p-4">
                     {!selectedBoard ? (
-                        <p className="text-gray-400">Home Banner Ads</p>
+                        <>
+                            <p className="text-gray-400"></p>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+                                {Array.from({ length: 16 }, (_, i) => {
+                                    const index = i + 1;
+                                    const ext = index === 9 || index === 11 || index === 12 ? "png" : "jpg";
+                                    return (
+                                        <div key={index}>
+                                            <img
+                                                src={`/ads/${index}.${ext}`}
+                                                alt={`Ad ${index}`}
+                                                lazy="loading"
+                                            />
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </>
                     ) : videos.length === 0 ? (
                         <p className="text-gray-400">
                             No videos found in {selectedBoard.name}.
