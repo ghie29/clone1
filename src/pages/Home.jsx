@@ -5,46 +5,63 @@ import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import { MagnifyingGlassIcon, UserCircleIcon } from "@heroicons/react/24/outline";
 import Ads from "../components/Ads";
+import useSWR from "swr";
+
+const PAGE_SIZE = 30;
+
+// Fetch boards hook
+const fetchBoards = async () => {
+    const { data, error } = await supabase.from("boards").select("*").order("position", { ascending: true });
+    if (error) throw error;
+    return data;
+};
+
+// Fetch videos hook
+const fetchVideos = async (boardId, page = 1, searchQuery = "") => {
+    const from = (page - 1) * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+
+    let query = supabase.from("videos").select("*", { count: "exact" });
+
+    if (searchQuery.trim()) {
+        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
+    } else if (boardId) {
+        query = query.eq("board_id", boardId);
+    } else {
+        return { data: [], count: 0 };
+    }
+
+    const { data, count, error } = await query.order("created_at", { ascending: false }).range(from, to);
+
+    if (error) throw error;
+    return { data, count };
+};
 
 export default function Home() {
     const { boardSlug, page: pageParam } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
 
-    const [boards, setBoards] = useState([]);
-    const [videos, setVideos] = useState([]);
     const [selectedBoard, setSelectedBoard] = useState(null);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [page, setPage] = useState(Number(pageParam) || 1);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-    // search state
-    const [searchOpen, setSearchOpen] = useState(false);
-    const [searchQuery, setSearchQuery] = useState("");
+    // Boards SWR
+    const { data: boards = [], error: boardsError } = useSWR("boards", fetchBoards, { revalidateOnFocus: false });
 
-    // pagination
-    const [page, setPage] = useState(Number(pageParam) || 1);
-    const [total, setTotal] = useState(0);
-    const PAGE_SIZE = 30;
+    // Videos SWR
+    const { data: videosData, error: videosError } = useSWR(
+        selectedBoard?.id || searchQuery ? `videos-${selectedBoard?.id || "search"}-${page}-${searchQuery}` : null,
+        () => fetchVideos(selectedBoard?.id, page, searchQuery),
+        { revalidateOnFocus: false }
+    );
 
-    useEffect(() => {
-        fetchBoards();
-    }, []);
+    const videos = videosData?.data || [];
+    const total = videosData?.count || 0;
+    const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
-    useEffect(() => {
-        // reset page when search changes
-        setPage(1);
-    }, [searchQuery]);
-
-    useEffect(() => {
-        if (searchQuery.trim()) {
-            fetchSearchVideos(page);
-        } else if (selectedBoard) {
-            fetchBoardVideos(selectedBoard.id, page);
-        } else {
-            setVideos([]);
-            setTotal(0);
-        }
-    }, [selectedBoard, page, searchQuery]);
-
+    // Update selected board when boards or slug changes
     useEffect(() => {
         if (boardSlug && boards.length > 0) {
             const board = boards.find((b) => b.slug === boardSlug);
@@ -52,59 +69,13 @@ export default function Home() {
             setPage(Number(pageParam) || 1);
         } else {
             setSelectedBoard(null);
-            setVideos([]);
         }
     }, [boardSlug, pageParam, boards]);
 
-    const fetchBoards = async () => {
-        let { data } = await supabase
-            .from("boards")
-            .select("*")
-            .order("position", { ascending: true });
-        setBoards(data || []);
-    };
-
-    const fetchBoardVideos = async (boardId, pageNum = 1) => {
-        const from = (pageNum - 1) * PAGE_SIZE;
-        const to = from + PAGE_SIZE - 1;
-
-        let { data, count, error } = await supabase
-            .from("videos")
-            .select("*", { count: "exact" })
-            .eq("board_id", boardId)
-            .order("created_at", { ascending: false })
-            .range(from, to);
-
-        if (!error) {
-            setVideos(data || []);
-            setTotal(count || 0);
-        } else {
-            console.error(error);
-        }
-    };
-
-    const fetchSearchVideos = async (pageNum = 1) => {
-        const from = (pageNum - 1) * PAGE_SIZE;
-        const to = from + PAGE_SIZE - 1;
-
-        let { data, count, error } = await supabase
-            .from("videos")
-            .select("*", { count: "exact" })
-            .or(
-                `title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`
-            )
-            .order("created_at", { ascending: false })
-            .range(from, to);
-
-        if (!error) {
-            setVideos(data || []);
-            setTotal(count || 0);
-        } else {
-            console.error(error);
-        }
-    };
-
-    const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    // Reset page when search changes
+    useEffect(() => {
+        setPage(1);
+    }, [searchQuery]);
 
     const changePage = (newPage) => {
         setPage(newPage);
@@ -133,10 +104,7 @@ export default function Home() {
                                 : "Watch the newest uncensored Korean AV videos with English subtitles. Stream exclusive K-adult content now on AVKorTV."
                     }
                 />
-                <link
-                    rel="canonical"
-                    href={`https://redbang.xyz${location.pathname}`}
-                />
+                <link rel="canonical" href={`https://redbang.xyz${location.pathname}`} />
             </Helmet>
 
             {/* Header */}
@@ -144,32 +112,22 @@ export default function Home() {
                 <div className="flex justify-between items-center">
                     <h1 className="text-4xl font-bold">
                         <Link to="/">
-                            <img
-                                src="/avkortv_logo.png"
-                                alt="AVKorTV Logo"
-                                className="h-10 w-auto"
-                                loading="lazy"
-                            />
+                            <img src="/avkortv_logo.png" alt="AVKorTV Logo" className="h-10 w-auto" loading="lazy" />
                         </Link>
                     </h1>
 
                     <div className="flex items-center space-x-4">
-                        {/* Search Icon */}
                         <button
-                            onClick={() => setSearchOpen(!searchOpen)}
+                            onClick={() => setSearchQuery("")}
                             className="w-10 h-10 flex items-center justify-center bg-gray-700 rounded hover:bg-gray-600"
                         >
                             <MagnifyingGlassIcon className="h-6 w-6 text-white" />
                         </button>
 
-                        {/* Avatar Icon */}
-                        <button
-                            className="w-10 h-10 flex items-center justify-center bg-gray-700 rounded hover:bg-gray-600"
-                        >
+                        <button className="w-10 h-10 flex items-center justify-center bg-gray-700 rounded hover:bg-gray-600">
                             <UserCircleIcon className="h-6 w-6 text-white" />
                         </button>
 
-                        {/* Hamburger Button */}
                         <button
                             className="w-10 h-10 flex items-center justify-center bg-gray-700 rounded hover:bg-gray-600 md:hidden"
                             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -177,34 +135,33 @@ export default function Home() {
                             ☰
                         </button>
                     </div>
-                </div>
 
-                {/* Desktop Search Bar */}
-                <div
-                    className={`hidden md:block transition-all duration-300 overflow-hidden ${searchOpen ? "max-h-20 mt-4" : "max-h-0"
-                        }`}
-                >
-                    <input
-                        type="text"
-                        placeholder="Search..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full p-2 rounded bg-gray-700 text-white focus:outline-none"
-                    />
-                </div>
+                    {/* Search Bars */}
+                    <div
+                        className={`hidden md:block transition-all duration-300 overflow-hidden ${searchQuery ? "max-h-20 mt-4" : "max-h-0"
+                            }`}
+                    >
+                        <input
+                            type="text"
+                            placeholder="Search..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full p-2 rounded bg-gray-700 text-white focus:outline-none"
+                        />
+                    </div>
 
-                {/* Mobile Search Bar */}
-                <div
-                    className={`md:hidden transition-all duration-300 overflow-hidden ${searchOpen ? "max-h-20 mt-4" : "max-h-0"
-                        }`}
-                >
-                    <input
-                        type="text"
-                        placeholder="Search..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full p-2 rounded bg-gray-700 text-white focus:outline-none"
-                    />
+                    <div
+                        className={`md:hidden transition-all duration-300 overflow-hidden ${searchQuery ? "max-h-20 mt-4" : "max-h-0"
+                            }`}
+                    >
+                        <input
+                            type="text"
+                            placeholder="Search..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full p-2 rounded bg-gray-700 text-white focus:outline-none"
+                        />
+                    </div>
                 </div>
             </header>
 
@@ -230,46 +187,24 @@ export default function Home() {
                     ) : (
                         <>
                             <Ads />
-
-                            {searchQuery ? (
-                                <h2 className="text-xl font-bold mb-4">
-                                    Search results for "{searchQuery}"
-                                </h2>
-                            ) : (
-                                <h2 className="text-xl font-bold mb-4">
-                                    {selectedBoard?.name}
-                                </h2>
-                            )}
+                            <h2 className="text-xl font-bold mb-4">
+                                {searchQuery ? `Search results for "${searchQuery}"` : selectedBoard?.name}
+                            </h2>
 
                             <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-6">
                                 {videos.map((v) => (
-                                    <div
-                                        key={v.id}
-                                        className="bg-gray-800 border border-gray-700 rounded overflow-hidden shadow hover:shadow-lg transition"
-                                    >
-                                        <Link
-                                            to={`/watch/${v.slug}`}
-                                            className="block"
-                                        >
+                                    <div key={v.id} className="bg-gray-800 border border-gray-700 rounded overflow-hidden shadow hover:shadow-lg transition">
+                                        <Link to={`/watch/${v.slug}`} className="block">
                                             {v.thumbnail_url ? (
-                                                <img
-                                                    src={v.thumbnail_url}
-                                                    alt={v.title}
-                                                    loading="lazy"
-                                                    className="w-full h-40 object-cover"
-                                                />
+                                                <img src={v.thumbnail_url} alt={v.title} loading="lazy" className="w-full h-40 object-cover" />
                                             ) : (
                                                 <div className="w-full h-40 bg-gray-700 flex items-center justify-center text-gray-400">
                                                     No Thumbnail
                                                 </div>
                                             )}
                                             <div className="p-2">
-                                                <h3 className="font-semibold text-white line-clamp-3">
-                                                    {v.title}
-                                                </h3>
-                                                <p className="text-sm text-gray-400 line-clamp-2">
-                                                    {v.description}
-                                                </p>
+                                                <h3 className="font-semibold text-white line-clamp-3">{v.title}</h3>
+                                                <p className="text-sm text-gray-400 line-clamp-2">{v.description}</p>
                                             </div>
                                         </Link>
                                     </div>
@@ -282,32 +217,16 @@ export default function Home() {
                                     Page {page} of {totalPages} ({total} videos)
                                 </p>
                                 <div className="flex gap-2">
-                                    <button
-                                        onClick={() => changePage(1)}
-                                        disabled={page === 1}
-                                        className="px-3 py-1 bg-gray-700 rounded disabled:opacity-50"
-                                    >
+                                    <button onClick={() => changePage(1)} disabled={page === 1} className="px-3 py-1 bg-gray-700 rounded disabled:opacity-50">
                                         {"<<"}
                                     </button>
-                                    <button
-                                        onClick={() => changePage(page - 1)}
-                                        disabled={page === 1}
-                                        className="px-3 py-1 bg-gray-700 rounded disabled:opacity-50"
-                                    >
+                                    <button onClick={() => changePage(page - 1)} disabled={page === 1} className="px-3 py-1 bg-gray-700 rounded disabled:opacity-50">
                                         Prev
                                     </button>
-                                    <button
-                                        onClick={() => changePage(page + 1)}
-                                        disabled={page === totalPages}
-                                        className="px-3 py-1 bg-gray-700 rounded disabled:opacity-50"
-                                    >
+                                    <button onClick={() => changePage(page + 1)} disabled={page === totalPages} className="px-3 py-1 bg-gray-700 rounded disabled:opacity-50">
                                         Next
                                     </button>
-                                    <button
-                                        onClick={() => changePage(totalPages)}
-                                        disabled={page === totalPages}
-                                        className="px-3 py-1 bg-gray-700 rounded disabled:opacity-50"
-                                    >
+                                    <button onClick={() => changePage(totalPages)} disabled={page === totalPages} className="px-3 py-1 bg-gray-700 rounded disabled:opacity-50">
                                         {">>"}
                                     </button>
                                 </div>
