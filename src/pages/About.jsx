@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { supabase } from "../supabaseClient";
+import JuicyAd from "../components/JuicyAd";
 
 export default function About() {
     const location = useLocation();
@@ -142,18 +143,9 @@ export default function About() {
                             Sponsored
                         </h2>
                         <div className="space-y-4">
-                            <div
-                                className="bg-gray-700 h-60 flex items-center justify-center text-gray-400"
-                                dangerouslySetInnerHTML={{
-                                    __html: `
-          <script type="text/javascript" data-cfasync="false" async src="https://poweredby.jads.co/js/jads.js"></script>
-          <ins id="1047744" data-width="300" data-height="262"></ins>
-          <script type="text/javascript" data-cfasync="false" async>
-            (adsbyjuicy = window.adsbyjuicy || []).push({'adzone':1047744});
-          </script>
-        `,
-                                }}
-                            />
+                            <div className="bg-gray-700 h-60 flex items-center justify-center text-gray-400">
+                                <JuicyAd />
+                            </div>
                             <div className="bg-gray-700 h-60 flex items-center justify-center text-gray-400">
                                 Banner Ad 2
                             </div>
