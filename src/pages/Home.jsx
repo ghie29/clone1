@@ -119,7 +119,7 @@ export default function Home() {
                     </h1>
 
                     {/* Right side buttons */}
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2">
                         {/* Desktop search */}
                         <div className="hidden md:block">
                             <input
