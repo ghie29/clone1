@@ -15,7 +15,9 @@ export default function Watch() {
     const [boards, setBoards] = useState([]);
     const [selectedBoard, setSelectedBoard] = useState(null);
     const [video, setVideo] = useState(null);
-    const [relatedVideos, setRelatedVideos] = useState([]);
+    const [relatedVideos, setRelatedVideos] = useState([]); // all fetched
+    const [shuffledRelated, setShuffledRelated] = useState([]); // currently visible
+    const [visibleRelated, setVisibleRelated] = useState(18); // initial visible
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     // search
@@ -75,7 +77,9 @@ export default function Watch() {
 
         if (data) {
             const shuffled = data.sort(() => 0.5 - Math.random());
-            setRelatedVideos(shuffled.slice(0, 18));
+            setRelatedVideos(shuffled);
+            setShuffledRelated(shuffled.slice(0, 18));
+            setVisibleRelated(18);
         }
     };
 
@@ -86,9 +90,7 @@ export default function Watch() {
         let { data, count, error } = await supabase
             .from("videos")
             .select("*", { count: "exact" })
-            .or(
-                `title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`
-            )
+            .or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`)
             .order("created_at", { ascending: false })
             .range(from, to);
 
@@ -148,7 +150,6 @@ export default function Watch() {
         );
     };
 
-
     // JSON-LD
     const videoJsonLd = video
         ? {
@@ -194,15 +195,8 @@ export default function Watch() {
                                 : "Stay updated with the newest Korean AV content — uncensored and subtitled, only at AVKorTV.")
                     }
                 />
-                <link
-                    rel="canonical"
-                    href={`https://redbang.xyz${location.pathname}`}
-                />
-                {videoJsonLd && (
-                    <script type="application/ld+json">
-                        {JSON.stringify(videoJsonLd)}
-                    </script>
-                )}
+                <link rel="canonical" href={`https://redbang.xyz${location.pathname}`} />
+                {videoJsonLd && <script type="application/ld+json">{JSON.stringify(videoJsonLd)}</script>}
             </Helmet>
 
             {/* Header */}
@@ -210,31 +204,20 @@ export default function Watch() {
                 <div className="flex justify-between items-center">
                     <h1 className="text-4xl font-bold">
                         <Link to="/">
-                            <img
-                                src="/avkortv_logo.png"
-                                alt="AVKorTV Logo"
-                                className="h-10 w-auto"
-                            />
+                            <img src="/avkortv_logo.png" alt="AVKorTV Logo" className="h-10 w-auto" />
                         </Link>
                     </h1>
 
                     <div className="flex items-center space-x-4">
-                        {/* Search Icon */}
                         <button
                             onClick={() => setSearchOpen(!searchOpen)}
                             className="w-10 h-10 flex items-center justify-center bg-gray-700 rounded hover:bg-gray-600"
                         >
                             <MagnifyingGlassIcon className="h-6 w-6 text-white" />
                         </button>
-
-                        {/* Avatar Icon */}
-                        <button
-                            className="w-10 h-10 flex items-center justify-center bg-gray-700 rounded hover:bg-gray-600"
-                        >
+                        <button className="w-10 h-10 flex items-center justify-center bg-gray-700 rounded hover:bg-gray-600">
                             <UserCircleIcon className="h-6 w-6 text-white" />
                         </button>
-
-                        {/* Hamburger Button */}
                         <button
                             className="w-10 h-10 flex items-center justify-center bg-gray-700 rounded hover:bg-gray-600 md:hidden"
                             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -244,11 +227,8 @@ export default function Watch() {
                     </div>
                 </div>
 
-                {/* Desktop Search Bar */}
-                <div
-                    className={`hidden md:block transition-all duration-300 overflow-hidden ${searchOpen ? "max-h-20 mt-4" : "max-h-0"
-                        }`}
-                >
+                {/* Search Bars */}
+                <div className={`hidden md:block transition-all duration-300 overflow-hidden ${searchOpen ? "max-h-20 mt-4" : "max-h-0"}`}>
                     <input
                         type="text"
                         placeholder="Search..."
@@ -257,12 +237,7 @@ export default function Watch() {
                         className="w-full p-2 rounded bg-gray-700 text-white focus:outline-none"
                     />
                 </div>
-
-                {/* Mobile Search Bar */}
-                <div
-                    className={`md:hidden transition-all duration-300 overflow-hidden ${searchOpen ? "max-h-20 mt-4" : "max-h-0"
-                        }`}
-                >
+                <div className={`md:hidden transition-all duration-300 overflow-hidden ${searchOpen ? "max-h-20 mt-4" : "max-h-0"}`}>
                     <input
                         type="text"
                         placeholder="Search..."
@@ -282,19 +257,14 @@ export default function Watch() {
                     selectedBoard={selectedBoard}
                 />
 
-                {/* Main */}
-                <main className="flex-1 p-4">
+                {/* Main Content */}
+                <main className="flex-1 p-1">
                     {searchQuery ? (
                         <>
                             <Ads />
-                            <h2 className="text-xl font-bold mb-4">
-                                Search results for "{searchQuery}"
-                            </h2>
-
+                            <h2 className="text-xl font-bold mb-4">Search results for "{searchQuery}"</h2>
                             {searchResults.length === 0 ? (
-                                <p className="text-gray-400">
-                                    No results found.
-                                </p>
+                                <p className="text-gray-400">No results found.</p>
                             ) : (
                                 <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-6">
                                     {searchResults.map((v) => (
@@ -311,24 +281,13 @@ export default function Watch() {
                                                 }}
                                             >
                                                 {v.thumbnail_url ? (
-                                                    <img
-                                                        src={v.thumbnail_url}
-                                                        alt={v.title}
-                                                        loading="lazy"
-                                                        className="w-full h-40 object-cover"
-                                                    />
+                                                    <img src={v.thumbnail_url} alt={v.title} loading="lazy" className="w-full h-40 object-cover" />
                                                 ) : (
-                                                    <div className="w-full h-40 bg-gray-700 flex items-center justify-center text-gray-400">
-                                                        No Thumbnail
-                                                    </div>
+                                                    <div className="w-full h-40 bg-gray-700 flex items-center justify-center text-gray-400">No Thumbnail</div>
                                                 )}
                                                 <div className="p-2">
-                                                    <h3 className="font-semibold text-white line-clamp-3">
-                                                        {v.title}
-                                                    </h3>
-                                                    <p className="text-sm text-gray-400 line-clamp-2">
-                                                        {v.description}
-                                                    </p>
+                                                    <h3 className="font-semibold text-white line-clamp-3">{v.title}</h3>
+                                                    <p className="text-sm text-gray-400 line-clamp-2">{v.description}</p>
                                                 </div>
                                             </Link>
                                         </div>
@@ -340,36 +299,19 @@ export default function Watch() {
                             {searchTotal > PAGE_SIZE && (
                                 <div className="flex justify-between items-center mt-4">
                                     <p className="text-sm text-gray-400">
-                                        Page {page} of {totalPages} (
-                                        {searchTotal} videos)
+                                        Page {page} of {totalPages} ({searchTotal} videos)
                                     </p>
                                     <div className="flex gap-2">
-                                        <button
-                                            onClick={() => changePage(1)}
-                                            disabled={page === 1}
-                                            className="px-3 py-1 bg-gray-700 rounded disabled:opacity-50"
-                                        >
+                                        <button onClick={() => changePage(1)} disabled={page === 1} className="px-3 py-1 bg-gray-700 rounded disabled:opacity-50">
                                             {"<<"}
                                         </button>
-                                        <button
-                                            onClick={() => changePage(page - 1)}
-                                            disabled={page === 1}
-                                            className="px-3 py-1 bg-gray-700 rounded disabled:opacity-50"
-                                        >
+                                        <button onClick={() => changePage(page - 1)} disabled={page === 1} className="px-3 py-1 bg-gray-700 rounded disabled:opacity-50">
                                             Prev
                                         </button>
-                                        <button
-                                            onClick={() => changePage(page + 1)}
-                                            disabled={page === totalPages}
-                                            className="px-3 py-1 bg-gray-700 rounded disabled:opacity-50"
-                                        >
+                                        <button onClick={() => changePage(page + 1)} disabled={page === totalPages} className="px-3 py-1 bg-gray-700 rounded disabled:opacity-50">
                                             Next
                                         </button>
-                                        <button
-                                            onClick={() => changePage(totalPages)}
-                                            disabled={page === totalPages}
-                                            className="px-3 py-1 bg-gray-700 rounded disabled:opacity-50"
-                                        >
+                                        <button onClick={() => changePage(totalPages)} disabled={page === totalPages} className="px-3 py-1 bg-gray-700 rounded disabled:opacity-50">
                                             {">>"}
                                         </button>
                                     </div>
@@ -381,39 +323,52 @@ export default function Watch() {
                     ) : (
                         <div className="space-y-6">
                             <h2 className="text-xl font-bold">{video.title}</h2>
-                            <div className="w-full aspect-video bg-black rounded overflow-hidden">
-                                {renderPlayer()}
-                            </div>
+                            <div className="w-full aspect-video bg-black rounded overflow-hidden">{renderPlayer()}</div>
                             <p className="text-gray-400">{video.description}</p>
 
                             {/* Related Videos */}
-                            {relatedVideos.length > 0 && (
+                            {shuffledRelated.length > 0 && (
                                 <div className="mt-8">
                                     <Ads />
-                                    <h3 className="text-lg font-bold mb-4">
-                                                Related Videos
-                                    </h3>
+                                    <h3 className="text-lg font-bold mb-4">Related Videos</h3>
                                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-                                        {relatedVideos.map((rv) => (
+                                        {shuffledRelated.map((rv) => (
                                             <Link
                                                 key={rv.id}
                                                 to={`/watch/${rv.slug}`}
                                                 className="block bg-gray-800 rounded overflow-hidden hover:bg-gray-700 transition"
+                                                onClick={() => {
+                                                    const shuffled = relatedVideos
+                                                        .filter(v => v.slug !== rv.slug)
+                                                        .sort(() => 0.5 - Math.random());
+                                                    setShuffledRelated(shuffled.slice(0, 18));
+                                                    setVisibleRelated(18);
+                                                }}
                                             >
                                                 <img
-                                                    src={
-                                                        rv.thumbnail_url ||
-                                                        "https://via.placeholder.com/300x200?text=No+Image"
-                                                    }
+                                                    src={rv.thumbnail_url || "https://via.placeholder.com/300x200?text=No+Image"}
                                                     alt={rv.title}
                                                     className="w-full h-32 object-cover"
                                                 />
-                                                <div className="p-2 text-sm text-gray-200 line-clamp-2">
-                                                    {rv.title}
-                                                </div>
+                                                <div className="p-2 text-sm text-gray-200 line-clamp-2">{rv.title}</div>
                                             </Link>
                                         ))}
                                     </div>
+
+                                    {visibleRelated < relatedVideos.length && (
+                                        <div className="flex justify-center mt-4">
+                                            <button
+                                                onClick={() => {
+                                                    const nextVisible = visibleRelated + 18;
+                                                    setShuffledRelated(relatedVideos.slice(0, nextVisible));
+                                                    setVisibleRelated(nextVisible);
+                                                }}
+                                                className="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600 text-white"
+                                            >
+                                                Load More
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -424,30 +379,18 @@ export default function Watch() {
                 <aside className="hidden lg:block w-[300px] bg-gray-800 border-l border-gray-700 p-4">
                     <h2 className="font-bold text-gray-300 mb-2">배너</h2>
                     <div className="space-y-4">
-                        {/* Banner 1 - JuicyAds */}
                         <div className="bg-gray-700 flex items-center justify-center text-gray-400">
                             <ins id="1078510" data-width="300" data-height="250"></ins>
                             <script
                                 dangerouslySetInnerHTML={{
-                                    __html: `
-            (adsbyjuicy = window.adsbyjuicy || []).push({'adzone':1078510});
-          `,
+                                    __html: `(adsbyjuicy = window.adsbyjuicy || []).push({'adzone':1078510});`,
                                 }}
                             />
-                            <script
-                                src="https://poweredby.jads.co/js/jads.js"
-                                async
-                                data-cfasync="false"
-                            />
+                            <script src="https://poweredby.jads.co/js/jads.js" async data-cfasync="false" />
                         </div>
-
-                        {/* Banner 2 - Placeholder */}
-                        <div className="bg-gray-700 h-60 flex items-center justify-center text-gray-400">
-                            배너 광고
-                        </div>
+                        <div className="bg-gray-700 h-60 flex items-center justify-center text-gray-400">배너 광고</div>
                     </div>
                 </aside>
-
             </div>
 
             {/* Footer */}

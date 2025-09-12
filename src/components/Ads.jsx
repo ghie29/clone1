@@ -67,7 +67,7 @@ const Ads = () => {
                                 src={`/ads/${index}.${ext}`}
                                 alt={`Ad ${index}`}
                                 loading="lazy"
-                                className="w-full h-auto rounded shadow hover:scale-105 transition-transform duration-300"
+                                className="w-full h-auto"
                             />
                         </a>
                     );

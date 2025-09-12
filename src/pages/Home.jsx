@@ -179,7 +179,7 @@ export default function Home() {
                 />
 
                 {/* Main */}
-                <main className="flex-1 p-4">
+                <main className="flex-1 p-1">
                     {!selectedBoard && !searchQuery ? (
                         <Ads />
                     ) : videos.length === 0 ? (
