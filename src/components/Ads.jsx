@@ -21,6 +21,26 @@ const Ads = () => {
         };
     }, []);
 
+    // Example links (replace with your real ad links)
+    const adLinks = [
+        "https://t.me/sunmoa144",
+        "https://t.me/sunmoa144",
+        "https://t.me/sunmoa144",
+        "https://t.me/sunmoa144",
+        "https://t.me/sunmoa144",
+        "https://t.me/sunmoa144",
+        "https://t.me/sunmoa144",
+        "https://t.me/sunmoa144",
+        "https://t.me/sunmoa144",
+        "https://t.me/sunmoa144",
+        "https://t.me/sunmoa144",
+        "https://t.me/sunmoa144",
+        "https://t.me/sunmoa144",
+        "https://t.me/sunmoa144",
+        "https://t.me/sunmoa144",
+        "https://t.me/sunmoa144",
+    ];
+
     return (
         <div>
             {/* JuicyAds - Mobile only */}
@@ -28,21 +48,28 @@ const Ads = () => {
                 <ins id="1078510" data-width="300" data-height="250"></ins>
             </div>
 
-            {/* Your Ads grid */}
+            {/* Ads Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {Array.from({ length: 16 }, (_, i) => {
+                {Array.from({ length: 8 }, (_, i) => {
                     const index = i + 1;
                     const ext =
-                        index === 9 || index === 11 || index === 12 ? "png" : "jpg";
+                        index === 4 || index === 5 || index === 6 || index === 7 || index === 8 || index === 11 || index === 12 ? "png" : "jpg";
+
                     return (
-                        <div key={index}>
+                        <a
+                            key={index}
+                            href={adLinks[i]}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block"
+                        >
                             <img
                                 src={`/ads/${index}.${ext}`}
                                 alt={`Ad ${index}`}
                                 loading="lazy"
-                                className="w-full h-auto rounded"
+                                className="w-full h-auto rounded shadow hover:scale-105 transition-transform duration-300"
                             />
-                        </div>
+                        </a>
                     );
                 })}
             </div>
