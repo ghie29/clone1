@@ -84,6 +84,7 @@ export default function Home() {
         }
     };
 
+    const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
     return (
         <div className="flex flex-col min-h-screen bg-gray-900 text-gray-100">
             <Helmet>
@@ -108,18 +109,18 @@ export default function Home() {
             </Helmet>
 
             {/* Header */}
-            <header className="bg-gray-800 text-white p-4 shadow">
-                <div className="flex items-center">
-                    {/* Logo on the left */}
+            <header className="bg-gray-800 text-white shadow p-4">
+                <div className="flex items-center justify-between">
+                    {/* Logo */}
                     <h1 className="text-4xl font-bold">
                         <Link to="/">
                             <img src="/avkortv_logo.png" alt="AVKorTV Logo" className="h-10 w-auto" loading="lazy" />
                         </Link>
                     </h1>
 
-                    {/* Right side items */}
-                    <div className="ml-auto flex items-center space-x-4">
-                        {/* Search input */}
+                    {/* Right side buttons */}
+                    <div className="flex items-center space-x-4">
+                        {/* Desktop search */}
                         <div className="hidden md:block">
                             <input
                                 type="text"
@@ -130,9 +131,9 @@ export default function Home() {
                             />
                         </div>
 
-                        {/* Buttons */}
+                        {/* Search button toggles mobile search */}
                         <button
-                            onClick={() => setSearchQuery("")}
+                            onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
                             className="w-10 h-10 flex items-center justify-center bg-gray-700 rounded hover:bg-gray-600"
                         >
                             <MagnifyingGlassIcon className="h-6 w-6 text-white" />
@@ -142,6 +143,7 @@ export default function Home() {
                             <UserCircleIcon className="h-6 w-6 text-white" />
                         </button>
 
+                        {/* Mobile menu button */}
                         <button
                             className="w-10 h-10 flex items-center justify-center bg-gray-700 rounded hover:bg-gray-600 md:hidden"
                             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -149,19 +151,20 @@ export default function Home() {
                             ☰
                         </button>
                     </div>
+                </div>
 
-                    {/* Mobile search */}
-                    <div
-                        className={`md:hidden transition-all duration-300 overflow-hidden ${searchQuery ? "max-h-20 mt-4" : "max-h-0"}`}
-                    >
-                        <input
-                            type="text"
-                            placeholder="Search..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full p-2 rounded bg-gray-700 text-white focus:outline-none"
-                        />
-                    </div>
+                {/* Mobile dropdown search */}
+                <div
+                    className={`md:hidden mt-2 transition-all duration-300 overflow-hidden ${mobileSearchOpen ? "max-h-20" : "max-h-0"
+                        }`}
+                >
+                    <input
+                        type="text"
+                        placeholder="Search..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full p-2 rounded bg-gray-700 text-white focus:outline-none"
+                    />
                 </div>
             </header>
 
