@@ -109,14 +109,28 @@ export default function Home() {
 
             {/* Header */}
             <header className="bg-gray-800 text-white p-4 shadow">
-                <div className="flex justify-between items-center">
+                <div className="flex items-center">
+                    {/* Logo on the left */}
                     <h1 className="text-4xl font-bold">
                         <Link to="/">
                             <img src="/avkortv_logo.png" alt="AVKorTV Logo" className="h-10 w-auto" loading="lazy" />
                         </Link>
                     </h1>
 
-                    <div className="flex items-center space-x-4">
+                    {/* Right side items */}
+                    <div className="ml-auto flex items-center space-x-4">
+                        {/* Search input */}
+                        <div className="hidden md:block">
+                            <input
+                                type="text"
+                                placeholder="Search..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full max-w-xs p-2 rounded bg-gray-700 text-white focus:outline-none"
+                            />
+                        </div>
+
+                        {/* Buttons */}
                         <button
                             onClick={() => setSearchQuery("")}
                             className="w-10 h-10 flex items-center justify-center bg-gray-700 rounded hover:bg-gray-600"
@@ -136,23 +150,9 @@ export default function Home() {
                         </button>
                     </div>
 
-                    {/* Search Bars */}
+                    {/* Mobile search */}
                     <div
-                        className={`hidden md:block transition-all duration-300 overflow-hidden ${searchQuery ? "max-h-20 mt-4" : "max-h-0"
-                            }`}
-                    >
-                        <input
-                            type="text"
-                            placeholder="Search..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full p-2 rounded bg-gray-700 text-white focus:outline-none"
-                        />
-                    </div>
-
-                    <div
-                        className={`md:hidden transition-all duration-300 overflow-hidden ${searchQuery ? "max-h-20 mt-4" : "max-h-0"
-                            }`}
+                        className={`md:hidden transition-all duration-300 overflow-hidden ${searchQuery ? "max-h-20 mt-4" : "max-h-0"}`}
                     >
                         <input
                             type="text"
@@ -164,6 +164,7 @@ export default function Home() {
                     </div>
                 </div>
             </header>
+
 
             <div className="flex flex-1">
                 {/* Sidebar */}
