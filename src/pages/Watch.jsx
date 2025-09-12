@@ -206,7 +206,7 @@ export default function Watch() {
             </Helmet>
 
             {/* Header */}
-            <header className="bg-gray-800 text-white p-4 shadow">
+            <header className="bg-gray-800 text-white shadow p-1">
                 <div className="flex justify-between items-center">
                     <h1 className="text-4xl font-bold">
                         <Link to="/">

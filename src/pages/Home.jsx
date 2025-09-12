@@ -109,7 +109,7 @@ export default function Home() {
             </Helmet>
 
             {/* Header */}
-            <header className="bg-gray-800 text-white shadow p-4">
+            <header className="bg-gray-800 text-white shadow p-1">
                 <div className="flex items-center justify-between">
                     {/* Logo */}
                     <h1 className="text-4xl font-bold">
