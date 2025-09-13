@@ -1,39 +1,49 @@
 ﻿import { useEffect, useRef } from "react";
+import videojs from "video.js";
+import "video.js/dist/video-js.css";
 
 export default function VideoPlayer({ src }) {
     const videoRef = useRef(null);
+    const playerRef = useRef(null);
 
     useEffect(() => {
-        const video = videoRef.current;
-        if (!video) return;
+        if (!videoRef.current) return;
 
-        // If Hls.js is available and supported by this browser
-        if (window.Hls && window.Hls.isSupported()) {
-            const hls = new window.Hls();
-            hls.loadSource(src);
-            hls.attachMedia(video);
-
-            // Clean up when src changes or component unmounts
-            return () => {
-                hls.destroy();
-            };
+        // Dispose previous instance if exists
+        if (playerRef.current) {
+            playerRef.current.dispose();
         }
 
-        // Fallback for Safari (built-in HLS support)
-        if (video.canPlayType("application/vnd.apple.mpegurl")) {
-            video.src = src;
-        } else {
-            // For MP4 or other direct video sources
-            video.src = src;
-        }
+        // Initialize Video.js player
+        playerRef.current = videojs(videoRef.current, {
+            autoplay: false,
+            controls: true,
+            responsive: true,
+            fluid: true,
+            preload: "auto",
+            sources: [
+                {
+                    src, // pass your proxied HLS URL here
+                    type: "application/x-mpegURL",
+                },
+            ],
+        });
+
+        // Cleanup on unmount
+        return () => {
+            if (playerRef.current) {
+                playerRef.current.dispose();
+            }
+        };
     }, [src]);
 
     return (
-        <video
-            ref={videoRef}
-            controls
-            playsInline
-            className="w-full h-full rounded-md bg-black"
-        />
+        <div data-vjs-player className="w-full">
+            <video
+                ref={videoRef}
+                className="video-js vjs-default-skin vjs-big-play-centered vjs-16-9 w-full h-full"
+                playsInline
+            />
+        </div>
     );
 }
