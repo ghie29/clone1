@@ -1,48 +1,39 @@
 ﻿import { useEffect, useRef } from "react";
-import videojs from "video.js";
-import "video.js/dist/video-js.css";
 
 export default function VideoPlayer({ src }) {
     const videoRef = useRef(null);
-    const playerRef = useRef(null);
 
     useEffect(() => {
-        if (!videoRef.current) return;
+        const video = videoRef.current;
+        if (!video) return;
 
-        if (playerRef.current) {
-            playerRef.current.dispose();
+        // If Hls.js is available and supported by this browser
+        if (window.Hls && window.Hls.isSupported()) {
+            const hls = new window.Hls();
+            hls.loadSource(src);
+            hls.attachMedia(video);
+
+            // Clean up when src changes or component unmounts
+            return () => {
+                hls.destroy();
+            };
         }
 
-        playerRef.current = videojs(videoRef.current, {
-            autoplay: false,
-            controls: true,
-            responsive: true,
-            fluid: true, // 👈 Makes the player fluid width
-            preload: "auto",
-            sources: [
-                {
-                    src,
-                    type: src.endsWith(".m3u8")
-                        ? "application/x-mpegURL"
-                        : "video/mp4",
-                },
-            ],
-        });
-
-        return () => {
-            if (playerRef.current) {
-                playerRef.current.dispose();
-            }
-        };
+        // Fallback for Safari (built-in HLS support)
+        if (video.canPlayType("application/vnd.apple.mpegurl")) {
+            video.src = src;
+        } else {
+            // For MP4 or other direct video sources
+            video.src = src;
+        }
     }, [src]);
 
     return (
-        <div data-vjs-player className="w-full">
-            <video
-                ref={videoRef}
-                className="video-js vjs-default-skin vjs-big-play-centered vjs-16-9 w-full h-full"
-                playsInline
-            />
-        </div>
+        <video
+            ref={videoRef}
+            controls
+            playsInline
+            className="w-full h-full rounded-md bg-black"
+        />
     );
 }
