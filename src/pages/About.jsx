@@ -31,7 +31,7 @@ export default function About() {
                 />
                 <link
                     rel="canonical"
-                    href={`https://redbang.xyz${location.pathname}`}
+                    href={`https://avkortv.site${location.pathname}`}
                 />
             </Helmet>
 

@@ -162,13 +162,13 @@ export default function Watch() {
             thumbnailUrl: [video.thumbnail_url],
             uploadDate: video.created_at || new Date().toISOString(),
             contentUrl: video.video_url,
-            embedUrl: `https://redbang.xyz/watch/${video.slug}`,
+            embedUrl: `https://avkortv.site/watch/${video.slug}`,
             publisher: {
                 "@type": "Organization",
                 name: "AVKorTV",
                 logo: {
                     "@type": "ImageObject",
-                    url: "https://redbang.xyz/avkortv_logo.png",
+                    url: "https://avkortv.site/avkortv_logo.png",
                 },
             },
         }
@@ -195,7 +195,7 @@ export default function Watch() {
                                 : "Stay updated with the newest Korean AV content — uncensored and subtitled, only at AVKorTV.")
                     }
                 />
-                <link rel="canonical" href={`https://redbang.xyz${location.pathname}`} />
+                <link rel="canonical" href={`https://avkortv.site${location.pathname}`} />
                 {videoJsonLd && <script type="application/ld+json">{JSON.stringify(videoJsonLd)}</script>}
             </Helmet>
 

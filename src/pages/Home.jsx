@@ -105,7 +105,7 @@ export default function Home() {
                                 : "Watch the newest uncensored Korean AV videos with English subtitles. Stream exclusive K-adult content now on AVKorTV."
                     }
                 />
-                <link rel="canonical" href={`https://redbang.xyz${location.pathname}`} />
+                <link rel="canonical" href={`https://avkortv.site${location.pathname}`} />
             </Helmet>
 
             {/* Header */}
