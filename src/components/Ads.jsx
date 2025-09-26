@@ -23,22 +23,22 @@ const Ads = () => {
 
     // Example links (replace with your real ad links)
     const adLinks = [
-        "https://t.me/sunmoa144",
-        "https://t.me/sunmoa144",
-        "https://t.me/sunmoa144",
-        "https://t.me/sunmoa144",
-        "https://t.me/sunmoa144",
-        "https://t.me/sunmoa144",
-        "https://t.me/sunmoa144",
-        "https://t.me/sunmoa144",
-        "https://t.me/sunmoa144",
-        "https://t.me/sunmoa144",
-        "https://t.me/sunmoa144",
-        "https://t.me/sunmoa144",
-        "https://t.me/sunmoa144",
-        "https://t.me/sunmoa144",
-        "https://t.me/sunmoa144",
-        "https://t.me/sunmoa144",
+        "https://t.me/dowinn0629",
+        "https://t.me/dowinn0629",
+        "https://t.me/dowinn0629",
+        "https://t.me/dowinn0629",
+        "https://t.me/dowinn0629",
+        "https://t.me/dowinn0629",
+        "https://t.me/dowinn0629",
+        "https://t.me/dowinn0629",
+        "https://t.me/dowinn0629",
+        "https://t.me/dowinn0629",
+        "https://t.me/dowinn0629",
+        "https://t.me/dowinn0629",
+        "https://t.me/dowinn0629",
+        "https://t.me/dowinn0629",
+        "https://t.me/dowinn0629",
+        "https://t.me/dowinn0629",
     ];
 
     return (
