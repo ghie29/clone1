@@ -50,7 +50,7 @@ const Ads = () => {
 
             {/* Ads Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {Array.from({ length: 8 }, (_, i) => {
+                {Array.from({ length: 4 }, (_, i) => {
                     const index = i + 1;
                     const ext =
                         index === 4 || index === 5 || index === 6 || index === 7 || index === 8 || index === 11 || index === 12 ? "png" : "jpg";
